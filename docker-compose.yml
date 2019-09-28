@@ -1,0 +1,13 @@
+version: "3"
+services:
+
+  webapp:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      BROWSER: 'chrome'
+      DOCKER: 'false'
+    command: ["/bin/sh", "entry_point.sh"]
+    volumes:
+      - .:/MyOwn

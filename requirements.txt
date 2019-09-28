@@ -1,0 +1,4 @@
+behave==1.2.6
+allure-behave==2.5.2
+selene==1.0.0a11
+webdriver-manager==1.4.5

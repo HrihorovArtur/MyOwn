@@ -1,0 +1,47 @@
+# run in PowerShell to have correct mount
+#  $Env:COMPOSE_CONVERT_WINDOWS_PATHS=1
+version: '3'
+networks:
+  selenoid:
+    external:
+      name: selenoid
+services:
+  selenoid:
+    networks:
+      selenoid: null
+    image: "aerokube/selenoid:latest-release"
+    ports:
+      - 4444:4444
+    volumes:
+      - ".:/etc/selenoid/"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ".:/opt/selenoid/video"
+      - ".:/opt/selenoid/logs"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=.
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/log", "-container-network", "selenoid", "-retry-count", "5", "-timeout", "5m0s"]
+
+  selenoid-ui:
+    networks:
+      selenoid: null
+    image: "aerokube/selenoid-ui"
+    links:
+      - selenoid
+    ports:
+      - "8080:8080"
+    command: ["--selenoid-uri", "http://selenoid:4444"]
+
+  app:
+    networks:
+      selenoid: null
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      DOCKER: 'true'
+    depends_on:
+      - selenoid
+      - selenoid-ui
+    command: ["/bin/sh", "entry_point.sh"]
+    volumes:
+      - .:/MyOwn
